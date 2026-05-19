@@ -1,0 +1,486 @@
+{
+  "info": {
+    "name": "TiendaOnline API",
+    "description": "Colección completa de endpoints para la API REST de TiendaOnline. Base URL: http://localhost:3000\n\n**Autenticación:**\nLos endpoints marcados como 'Admin' o 'Privado' requieren el header:\n`Authorization: Bearer <token>`\n\nObtén el token haciendo POST a /api/auth/login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT obtenido al hacer login. Se actualiza automáticamente con el script del endpoint Login."
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Registro, login y perfil del usuario autenticado.",
+      "item": [
+        {
+          "name": "Registro de usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api","auth","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez\",\n  \"email\": \"juan@ejemplo.com\",\n  \"password\": \"Segura123!\"\n}"
+            },
+            "description": "Crea una nueva cuenta de usuario con rol 'user'.\n\n**Validaciones:**\n- name: mínimo 2 caracteres\n- email: formato válido y único\n- password: mínimo 6 caracteres"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 3,\n    \"name\": \"Juan Pérez\",\n    \"email\": \"juan@ejemplo.com\",\n    \"role\": \"user\"\n  }\n}"
+            },
+            {
+              "name": "400 Validación fallida",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"error\": \"Validation failed\",\n  \"details\": [\"\\\"email\\\" must be a valid email\"]\n}"
+            },
+            {
+              "name": "409 Email duplicado",
+              "status": "Conflict",
+              "code": 409,
+              "body": "{\n  \"error\": \"Email already in use\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "  console.log('Token guardado en variable de colección.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api","auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@tienda.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "description": "Autentica al usuario y devuelve un JWT.\n\nEl script de test guarda automáticamente el token en la variable `{{token}}` de la colección."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 1,\n    \"name\": \"Admin\",\n    \"email\": \"admin@tienda.com\",\n    \"role\": \"admin\"\n  }\n}"
+            },
+            {
+              "name": "401 Credenciales inválidas",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"error\": \"Invalid credentials\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Perfil actual (me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/auth/me", "host": ["{{base_url}}"], "path": ["api","auth","me"] },
+            "description": "Devuelve el perfil del usuario autenticado a partir del JWT.\n\n**Requiere:** Header `Authorization: Bearer <token>`"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Admin\",\n    \"email\": \"admin@tienda.com\",\n    \"role\": \"admin\",\n    \"created_at\": \"2025-01-01T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "401 Sin token",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"error\": \"No token provided\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "description": "CRUD de productos. Lectura pública, escritura solo para Admin.",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?page=1&limit=12",
+              "host": ["{{base_url}}"],
+              "path": ["api","products"],
+              "query": [
+                { "key": "page", "value": "1", "description": "Número de página (default: 1)" },
+                { "key": "limit", "value": "12", "description": "Resultados por página (default: 12)" },
+                { "key": "category_id", "value": "", "description": "Filtrar por ID de categoría", "disabled": true },
+                { "key": "search", "value": "", "description": "Buscar por nombre (ILIKE)", "disabled": true }
+              ]
+            },
+            "description": "Devuelve una lista paginada de productos. Soporta filtros por categoría y búsqueda por nombre.\n\n**Query params opcionales:**\n- `page` — página actual\n- `limit` — elementos por página\n- `category_id` — filtra por categoría\n- `search` — busca en el nombre del producto"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Laptop Pro\",\n      \"description\": \"Laptop de alto rendimiento\",\n      \"price\": \"15999.00\",\n      \"stock\": 20,\n      \"image_url\": null,\n      \"images\": [],\n      \"specifications\": [{\"key\": \"Procesador\", \"value\": \"Intel Core i7\"}],\n      \"category_id\": 1,\n      \"category_name\": \"Electrónica\",\n      \"created_at\": \"2025-01-01T00:00:00.000Z\",\n      \"updated_at\": \"2025-01-01T00:00:00.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"total\": 10,\n    \"page\": 1,\n    \"limit\": 12,\n    \"totalPages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener producto por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/products/1", "host": ["{{base_url}}"], "path": ["api","products","1"] },
+            "description": "Devuelve un producto por su ID, incluyendo el nombre de su categoría."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Laptop Pro\",\n    \"price\": \"15999.00\",\n    \"stock\": 20,\n    \"images\": [\"https://...\"],\n    \"specifications\": [{\"key\": \"RAM\", \"value\": \"16GB\"}],\n    \"category_name\": \"Electrónica\"\n  }\n}"
+            },
+            {
+              "name": "404 No encontrado",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"error\": \"Product not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/products", "host": ["{{base_url}}"], "path": ["api","products"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Auriculares Bluetooth\",\n  \"description\": \"Sonido de alta fidelidad con cancelación de ruido\",\n  \"price\": 1299.99,\n  \"stock\": 50,\n  \"image_url\": \"https://ejemplo.com/auriculares.jpg\",\n  \"images\": [\n    \"https://ejemplo.com/auriculares-1.jpg\",\n    \"https://ejemplo.com/auriculares-2.jpg\"\n  ],\n  \"category_id\": 1,\n  \"specifications\": [\n    { \"key\": \"Conectividad\", \"value\": \"Bluetooth 5.0\" },\n    { \"key\": \"Autonomía\", \"value\": \"30 horas\" }\n  ]\n}"
+            },
+            "description": "Crea un nuevo producto.\n\n**Requiere:** Rol Admin\n\n**Campos obligatorios:** `name`, `price`\n\n**Campos opcionales:** `description`, `stock`, `image_url`, `images[]`, `category_id`, `specifications[]`"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": 11,\n    \"name\": \"Auriculares Bluetooth\",\n    \"price\": \"1299.99\",\n    \"stock\": 50\n  }\n}"
+            },
+            {
+              "name": "400 Validación fallida",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"error\": \"Validation failed\",\n  \"details\": [\"\\\"price\\\" is required\"]\n}"
+            },
+            {
+              "name": "403 Sin permisos",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"error\": \"Forbidden\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/products/1", "host": ["{{base_url}}"], "path": ["api","products","1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop Pro Max\",\n  \"price\": 17999.99,\n  \"stock\": 15,\n  \"specifications\": [\n    { \"key\": \"Procesador\", \"value\": \"Intel Core i9\" },\n    { \"key\": \"RAM\", \"value\": \"32GB\" }\n  ]\n}"
+            },
+            "description": "Actualiza un producto existente. Solo se modifican los campos enviados.\n\n**Requiere:** Rol Admin"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Laptop Pro Max\",\n    \"price\": \"17999.99\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/products/1", "host": ["{{base_url}}"], "path": ["api","products","1"] },
+            "description": "Elimina un producto por su ID.\n\n**Requiere:** Rol Admin"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Product deleted\",\n  \"id\": 1\n}"
+            },
+            {
+              "name": "404 No encontrado",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"error\": \"Product not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "description": "CRUD de categorías. Lectura pública, escritura solo para Admin.",
+      "item": [
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api","categories"] },
+            "description": "Devuelve todas las categorías disponibles."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"id\": 1, \"name\": \"Electrónica\", \"description\": null, \"created_at\": \"2025-01-01T00:00:00.000Z\" },\n    { \"id\": 2, \"name\": \"Ropa\", \"description\": null, \"created_at\": \"2025-01-01T00:00:00.000Z\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener categoría por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/categories/1", "host": ["{{base_url}}"], "path": ["api","categories","1"] },
+            "description": "Devuelve una categoría específica por su ID."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": { \"id\": 1, \"name\": \"Electrónica\", \"description\": null }\n}"
+            },
+            {
+              "name": "404 No encontrada",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"error\": \"Category not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api","categories"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Deportes\",\n  \"description\": \"Equipamiento y ropa deportiva\"\n}"
+            },
+            "description": "Crea una nueva categoría.\n\n**Requiere:** Rol Admin\n\n**Campos obligatorios:** `name`"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": { \"id\": 6, \"name\": \"Deportes\", \"description\": \"Equipamiento y ropa deportiva\" }\n}"
+            },
+            {
+              "name": "409 Nombre duplicado",
+              "status": "Conflict",
+              "code": 409,
+              "body": "{\n  \"error\": \"Category already exists\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/categories/6", "host": ["{{base_url}}"], "path": ["api","categories","6"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Deportes y Outdoor\",\n  \"description\": \"Todo para el deporte y actividades al aire libre\"\n}"
+            },
+            "description": "Actualiza una categoría existente.\n\n**Requiere:** Rol Admin"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": { \"id\": 6, \"name\": \"Deportes y Outdoor\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/categories/6", "host": ["{{base_url}}"], "path": ["api","categories","6"] },
+            "description": "Elimina una categoría. Los productos asociados quedan sin categoría (`category_id = NULL`) gracias a `ON DELETE SET NULL`.\n\n**Requiere:** Rol Admin"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Category deleted\",\n  \"id\": 6\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "description": "Gestión de usuarios. Requiere autenticación. Algunas operaciones son solo para Admin.",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/users", "host": ["{{base_url}}"], "path": ["api","users"] },
+            "description": "Devuelve todos los usuarios registrados.\n\n**Requiere:** Rol Admin"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"id\": 1, \"name\": \"Admin\", \"email\": \"admin@tienda.com\", \"role\": \"admin\", \"created_at\": \"2025-01-01T00:00:00.000Z\" },\n    { \"id\": 2, \"name\": \"Usuario Normal\", \"email\": \"user@tienda.com\", \"role\": \"user\", \"created_at\": \"2025-01-01T00:00:00.000Z\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/users/1", "host": ["{{base_url}}"], "path": ["api","users","1"] },
+            "description": "Devuelve un usuario por su ID.\n\n**Requiere:** Estar autenticado. Un usuario solo puede ver su propio perfil; el Admin puede ver cualquiera."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": { \"id\": 1, \"name\": \"Admin\", \"email\": \"admin@tienda.com\", \"role\": \"admin\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/users/2", "host": ["{{base_url}}"], "path": ["api","users","2"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nombre Actualizado\",\n  \"email\": \"nuevo@email.com\",\n  \"password\": \"NuevaClave456!\"\n}"
+            },
+            "description": "Actualiza el perfil de un usuario.\n\n**Requiere:** Estar autenticado. Un usuario solo puede modificar su propio perfil. Solo el Admin puede cambiar el campo `role`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": { \"id\": 2, \"name\": \"Nombre Actualizado\", \"email\": \"nuevo@email.com\", \"role\": \"user\" }\n}"
+            },
+            {
+              "name": "403 Sin permisos",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"error\": \"Forbidden\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/api/users/2", "host": ["{{base_url}}"], "path": ["api","users","2"] },
+            "description": "Elimina un usuario por su ID.\n\n**Requiere:** Rol Admin"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"User deleted\",\n  \"id\": 2\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Estado del servidor",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/health", "host": ["{{base_url}}"], "path": ["api","health"] },
+            "description": "Verifica que el servidor está corriendo correctamente. No requiere autenticación."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2025-05-19T12:00:00.000Z\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

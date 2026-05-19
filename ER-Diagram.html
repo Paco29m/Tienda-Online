@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Diagrama ER — TiendaOnline</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      color: #e94560;
+      margin-bottom: 48px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .canvas {
+      position: relative;
+      width: 900px;
+    }
+
+    svg.arrows {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* ── Tables ── */
+    .table {
+      position: absolute;
+      background: #1a1a2e;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      min-width: 240px;
+    }
+
+    .table__head {
+      padding: 12px 18px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table--users     .table__head { background: #16213e; border-bottom: 2px solid #4361ee; color: #7b9cff; }
+    .table--categories .table__head { background: #1a1a0a; border-bottom: 2px solid #f4a261; color: #f4c07a; }
+    .table--products  .table__head { background: #1a0a14; border-bottom: 2px solid #e94560; color: #ff7896; }
+
+    .table__body { padding: 8px 0; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 56px 1fr 1fr;
+      gap: 0;
+      padding: 5px 18px;
+      font-size: 0.78rem;
+      align-items: center;
+      border-left: 3px solid transparent;
+      transition: background 0.15s;
+    }
+    .row:hover { background: rgba(255,255,255,0.04); }
+
+    .row__badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+    .badge--pk  { background: #e94560; color: #fff; }
+    .badge--fk  { background: #f4a261; color: #000; }
+    .badge--uk  { background: #4361ee; color: #fff; }
+    .badge--idx { background: #333; color: #aaa; }
+
+    .row__name { color: #e8e8e8; font-weight: 500; }
+    .row__type { color: #666; font-size: 0.72rem; text-align: right; }
+
+    .row--pk   { border-left-color: #e94560; }
+    .row--fk   { border-left-color: #f4a261; }
+    .row--uk   { border-left-color: #4361ee; }
+
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      margin: 4px 18px;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 24px;
+      margin-top: 48px;
+      font-size: 0.75rem;
+      color: #888;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+    }
+
+    /* ── Positions ── */
+    .table--users      { top: 10px;  left: 0px; }
+    .table--categories { top: 10px;  left: 330px; }
+    .table--products   { top: 10px;  left: 630px; }
+
+    .canvas { height: 560px; }
+  </style>
+</head>
+<body>
+
+<h1>Diagrama Entidad-Relación — TiendaOnline</h1>
+
+<div class="canvas">
+
+  <!-- SVG arrows -->
+  <svg class="arrows">
+    <defs>
+      <!-- Many side arrowhead (filled) -->
+      <marker id="arrow-many" markerWidth="10" markerHeight="10"
+              refX="9" refY="3.5" orient="auto">
+        <path d="M0,0 L0,7 L9,3.5 Z" fill="#f4a261"/>
+      </marker>
+      <!-- One side (circle) -->
+      <marker id="circle-one" markerWidth="8" markerHeight="8"
+              refX="4" refY="4" orient="auto">
+        <circle cx="4" cy="4" r="3" fill="none" stroke="#f4a261" stroke-width="1.5"/>
+      </marker>
+    </defs>
+
+    <!-- categories (right edge ~570) → products.category_id (left edge ~630) -->
+    <line x1="570" y1="58" x2="630" y2="105"
+          stroke="#f4a261" stroke-width="1.8" stroke-dasharray="6 3"
+          marker-start="circle-one" marker-end="arrow-many"/>
+
+    <!-- label 1 -->
+    <text x="573" y="72" fill="#f4a261" font-size="11" font-family="Segoe UI,sans-serif" font-weight="700">1</text>
+    <!-- label N -->
+    <text x="610" y="100" fill="#f4a261" font-size="11" font-family="Segoe UI,sans-serif" font-weight="700">N</text>
+  </svg>
+
+  <!-- ══ TABLE: USERS ══ -->
+  <div class="table table--users">
+    <div class="table__head">👤 USERS</div>
+    <div class="table__body">
+      <div class="row row--pk">
+        <span class="row__badge badge--pk">PK</span>
+        <span class="row__name">id</span>
+        <span class="row__type">SERIAL</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">name</span>
+        <span class="row__type">VARCHAR(100)</span>
+      </div>
+      <div class="row row--uk">
+        <span class="row__badge badge--uk">UK</span>
+        <span class="row__name">email</span>
+        <span class="row__type">VARCHAR(150)</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">password_hash</span>
+        <span class="row__type">VARCHAR(255)</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">role</span>
+        <span class="row__type">VARCHAR(10) ✓</span>
+      </div>
+      <div class="divider"></div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">created_at</span>
+        <span class="row__type">TIMESTAMP</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TABLE: CATEGORIES ══ -->
+  <div class="table table--categories">
+    <div class="table__head">🏷️ CATEGORIES</div>
+    <div class="table__body">
+      <div class="row row--pk">
+        <span class="row__badge badge--pk">PK</span>
+        <span class="row__name">id</span>
+        <span class="row__type">SERIAL</span>
+      </div>
+      <div class="row row--uk">
+        <span class="row__badge badge--uk">UK</span>
+        <span class="row__name">name</span>
+        <span class="row__type">VARCHAR(100)</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">description</span>
+        <span class="row__type">TEXT</span>
+      </div>
+      <div class="divider"></div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">created_at</span>
+        <span class="row__type">TIMESTAMP</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TABLE: PRODUCTS ══ -->
+  <div class="table table--products">
+    <div class="table__head">📦 PRODUCTS</div>
+    <div class="table__body">
+      <div class="row row--pk">
+        <span class="row__badge badge--pk">PK</span>
+        <span class="row__name">id</span>
+        <span class="row__type">SERIAL</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">name</span>
+        <span class="row__type">VARCHAR(200)</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">description</span>
+        <span class="row__type">TEXT</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">price</span>
+        <span class="row__type">DECIMAL(10,2) ✓</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">stock</span>
+        <span class="row__type">INTEGER ✓</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">image_url</span>
+        <span class="row__type">VARCHAR(500)</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">images</span>
+        <span class="row__type">JSONB [ ]</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">specifications</span>
+        <span class="row__type">JSONB [ ]</span>
+      </div>
+      <div class="row row--fk">
+        <span class="row__badge badge--fk">FK</span>
+        <span class="row__name">category_id</span>
+        <span class="row__type">INTEGER</span>
+      </div>
+      <div class="divider"></div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">created_at</span>
+        <span class="row__type">TIMESTAMP</span>
+      </div>
+      <div class="row">
+        <span class="row__badge badge--idx"></span>
+        <span class="row__name">updated_at</span>
+        <span class="row__type">TIMESTAMP ⚡</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#e94560"></div> PK — Primary Key</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f4a261"></div> FK — Foreign Key</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4361ee"></div> UK — Unique</div>
+  <div class="legend-item">✓ — CHECK constraint</div>
+  <div class="legend-item">⚡ — Auto-updated (trigger)</div>
+  <div class="legend-item">[ ] — Array JSONB</div>
+</div>
+
+</body>
+</html>
