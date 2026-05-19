@@ -4,13 +4,15 @@ const { Client } = require('pg');
 const bcrypt = require('bcryptjs');
 
 async function seed() {
-  const client = new Client({
-    host:     process.env.DB_HOST,
-    port:     process.env.DB_PORT,
-    database: process.env.DB_NAME,
-    user:     process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-  });
+  const client = process.env.DATABASE_URL
+    ? new Client({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+    : new Client({
+        host:     process.env.DB_HOST,
+        port:     process.env.DB_PORT,
+        database: process.env.DB_NAME,
+        user:     process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+      });
 
   try {
     await client.connect();
