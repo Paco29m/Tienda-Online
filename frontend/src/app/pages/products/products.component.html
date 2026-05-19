@@ -1,0 +1,109 @@
+<div class="products-page">
+  <div class="section-container">
+    <h1 class="products-page__title">Productos</h1>
+
+    <div class="products-page__filters">
+      <div class="filter-group">
+        <label class="filter-group__label">Categoría</label>
+        <select class="filter-group__select" [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+          <option value="">Todas</option>
+          @for (cat of categories; track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group filter-group--search">
+        <input
+          type="text"
+          class="filter-group__input"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchInput()"
+          (keyup.enter)="onSearch()"
+          placeholder="Buscar producto..."
+          autocomplete="off"
+        />
+        <button class="filter-group__btn" (click)="onSearch()">Buscar</button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="products-grid">
+        @for (_ of skeletons; track $index) {
+          <div class="skeleton-card">
+            <div class="skeleton skeleton--image"></div>
+            <div class="skeleton-card__body">
+              <div class="skeleton skeleton--text skeleton--short"></div>
+              <div class="skeleton skeleton--text"></div>
+              <div class="skeleton skeleton--text skeleton--mid"></div>
+              <div class="skeleton skeleton--btn"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (products.length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">🔍</div>
+        <h2 class="empty-state__title">Sin resultados</h2>
+        <p class="empty-state__text">
+          No encontramos productos
+          @if (searchQuery) { para "<strong>{{ searchQuery }}</strong>" }
+          @if (selectedCategory) { en esa categoría }.
+        </p>
+        <button class="btn" (click)="selectedCategory = ''; searchQuery = ''; loadProducts(1)">
+          Ver todos los productos
+        </button>
+      </div>
+    } @else {
+      <p class="products-page__count">{{ pagination.total }} producto(s) encontrado(s)</p>
+
+      <div class="products-grid">
+        @for (product of products; track product.id) {
+          <article class="product-card">
+            <a [routerLink]="['/products', product.id]" class="product-card__image-wrap">
+              <img [src]="product.image_url || 'https://picsum.photos/seed/' + product.id + '/400/300'"
+                   [alt]="product.name"
+                   class="product-card__image"
+                   loading="lazy" />
+            </a>
+            <div class="product-card__body">
+              <span class="product-card__category">{{ product.category_name }}</span>
+              <h3 class="product-card__name">
+                <a [routerLink]="['/products', product.id]">{{ product.name }}</a>
+              </h3>
+              <div class="product-card__footer">
+                <span class="product-card__price">{{ product.price | currency:'MXN':'symbol':'1.2-2' }}</span>
+                <span class="product-card__stock" [class.product-card__stock--low]="product.stock < 5">
+                  {{ product.stock > 0 ? 'En stock' : 'Agotado' }}
+                </span>
+              </div>
+              @if (product.stock > 0 && product.category_name !== 'Ropa') {
+                <button class="product-card__add-btn" (click)="addToCart(product)">
+                  + Agregar
+                </button>
+              }
+              @if (product.category_name === 'Ropa') {
+                <a [routerLink]="['/products', product.id]" class="product-card__add-btn product-card__add-btn--link">
+                  Ver tallas
+                </a>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (pagination.totalPages > 1) {
+        <nav class="pagination">
+          <button class="pagination__btn" (click)="goToPage(pagination.page - 1)"
+                  [disabled]="pagination.page === 1">&#8592;</button>
+          @for (p of pages; track p) {
+            <button class="pagination__btn" [class.pagination__btn--active]="p === pagination.page"
+                    (click)="goToPage(p)">{{ p }}</button>
+          }
+          <button class="pagination__btn" (click)="goToPage(pagination.page + 1)"
+                  [disabled]="pagination.page === pagination.totalPages">&#8594;</button>
+        </nav>
+      }
+    }
+  </div>
+</div>

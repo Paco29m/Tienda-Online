@@ -1,0 +1,60 @@
+<div class="admin-section">
+  <div class="admin-section__header">
+    <h1 class="admin-section__title">Categorías</h1>
+    <button class="btn" (click)="openCreate()">+ Nueva categoría</button>
+  </div>
+
+  @if (success) { <div class="alert alert--success">{{ success }}</div> }
+  @if (error) { <div class="alert alert--error">{{ error }}</div> }
+
+  @if (showForm) {
+    <div class="modal-backdrop" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2 class="modal__title">{{ editingId ? 'Editar' : 'Nueva' }} categoría</h2>
+
+        <div class="form-group">
+          <label class="form-group__label">Nombre *</label>
+          <input type="text" class="form-group__input" [(ngModel)]="form.name" />
+        </div>
+        <div class="form-group">
+          <label class="form-group__label">Descripción</label>
+          <textarea class="form-group__input" [(ngModel)]="form.description" rows="3"></textarea>
+        </div>
+
+        @if (error) { <div class="alert alert--error">{{ error }}</div> }
+
+        <div class="modal__actions">
+          <button class="btn btn--outline" (click)="closeForm()">Cancelar</button>
+          <button class="btn" (click)="submit()">{{ editingId ? 'Actualizar' : 'Crear' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">Cargando...</div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Nombre</th><th>Descripción</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categories; track cat.id) {
+            <tr>
+              <td>{{ cat.id }}</td>
+              <td>{{ cat.name }}</td>
+              <td>{{ cat.description || '—' }}</td>
+              <td class="data-table__actions">
+                <button class="btn btn--sm btn--outline" (click)="openEdit(cat)">Editar</button>
+                <button class="btn btn--sm btn--danger" (click)="delete(cat.id)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

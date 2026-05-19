@@ -1,0 +1,145 @@
+<div class="admin-section">
+  <div class="admin-section__header">
+    <h1 class="admin-section__title">Productos</h1>
+    <button class="btn" (click)="openCreate()">+ Nuevo producto</button>
+  </div>
+
+  @if (success) { <div class="alert alert--success">{{ success }}</div> }
+  @if (error) { <div class="alert alert--error">{{ error }}</div> }
+
+  @if (showForm) {
+    <div class="modal-backdrop" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2 class="modal__title">{{ editingId ? 'Editar' : 'Nuevo' }} producto</h2>
+
+        <div class="form-group">
+          <label class="form-group__label">Nombre *</label>
+          <input type="text" class="form-group__input" [(ngModel)]="form.name" />
+        </div>
+        <div class="form-group">
+          <label class="form-group__label">Descripción</label>
+          <textarea class="form-group__input" [(ngModel)]="form.description" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">Precio *</label>
+            <input type="number" class="form-group__input" [(ngModel)]="form.price" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">Stock</label>
+            <input type="number" class="form-group__input" [(ngModel)]="form.stock" min="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-group__label">URL de imagen principal</label>
+          <input type="url" class="form-group__input" [(ngModel)]="form.image_url" />
+        </div>
+
+        <div class="specs-editor">
+          <div class="specs-editor__header">
+            <span class="specs-editor__label">Imágenes del carrusel</span>
+            <button type="button" class="btn btn--sm btn--outline" (click)="addImage()">+ Agregar</button>
+          </div>
+          @if (formImages.length === 0) {
+            <p class="specs-editor__empty">Sin imágenes extra. Se usarán placeholders en el carrusel.</p>
+          }
+          @for (img of formImages; track $index) {
+            <div class="specs-editor__row specs-editor__row--single">
+              <input
+                type="url"
+                class="form-group__input"
+                [(ngModel)]="formImages[$index]"
+                [name]="'img-' + $index"
+                placeholder="https://ejemplo.com/imagen.jpg"
+              />
+              <button type="button" class="btn btn--sm btn--danger" (click)="removeImage($index)">✕</button>
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label class="form-group__label">Categoría</label>
+          <select class="form-group__input" [(ngModel)]="form.category_id">
+            <option [value]="undefined">Sin categoría</option>
+            @for (cat of categories; track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+
+        @if (isSpecsCategory) {
+          <div class="specs-editor">
+            <div class="specs-editor__header">
+              <span class="specs-editor__label">{{ specsLabel }}</span>
+              <button type="button" class="btn btn--sm btn--outline" (click)="addSpec()">+ Agregar</button>
+            </div>
+
+            @if (formSpecs.length === 0) {
+              <p class="specs-editor__empty">Sin especificaciones. Haz clic en "+ Agregar".</p>
+            }
+
+            @for (spec of formSpecs; track $index) {
+              <div class="specs-editor__row">
+                <input
+                  type="text"
+                  class="form-group__input"
+                  [(ngModel)]="spec.key"
+                  [name]="'spec-key-' + $index"
+                  placeholder="Característica (ej: Procesador)"
+                />
+                <input
+                  type="text"
+                  class="form-group__input"
+                  [(ngModel)]="spec.value"
+                  [name]="'spec-val-' + $index"
+                  placeholder="Valor (ej: Intel Core i7)"
+                />
+                <button type="button" class="btn btn--sm btn--danger" (click)="removeSpec($index)">✕</button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (error) { <div class="alert alert--error">{{ error }}</div> }
+
+        <div class="modal__actions">
+          <button class="btn btn--outline" (click)="closeForm()">Cancelar</button>
+          <button class="btn" (click)="submit()">{{ editingId ? 'Actualizar' : 'Crear' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">Cargando...</div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Imagen</th><th>Nombre</th><th>Categoría</th>
+            <th>Precio</th><th>Stock</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products; track product.id) {
+            <tr>
+              <td>{{ product.id }}</td>
+              <td>
+                <img [src]="product.image_url || 'https://picsum.photos/seed/' + product.id + '/60/45'"
+                     [alt]="product.name" class="data-table__thumb" />
+              </td>
+              <td>{{ product.name }}</td>
+              <td>{{ product.category_name || '—' }}</td>
+              <td>{{ product.price | currency:'MXN':'symbol':'1.2-2' }}</td>
+              <td>{{ product.stock }}</td>
+              <td class="data-table__actions">
+                <button class="btn btn--sm btn--outline" (click)="openEdit(product)">Editar</button>
+                <button class="btn btn--sm btn--danger" (click)="delete(product.id)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

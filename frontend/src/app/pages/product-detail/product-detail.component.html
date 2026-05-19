@@ -1,0 +1,111 @@
+<div class="section-container">
+  @if (loading) {
+    <div class="loading">Cargando...</div>
+  } @else if (error) {
+    <div class="empty-state">
+      <p>{{ error }}</p>
+      <a routerLink="/products" class="btn">Ver productos</a>
+    </div>
+  } @else if (product) {
+    <a routerLink="/products" class="back-link">&#8592; Volver a productos</a>
+
+    <div class="product-detail">
+      <div class="product-detail__gallery">
+        <div class="carousel">
+          <button class="carousel__btn carousel__btn--prev" (click)="prev()" [disabled]="carouselImages.length <= 1">&#8249;</button>
+          <div class="carousel__frame">
+            <img [src]="carouselImages[currentIndex]" [alt]="product.name" class="carousel__img" />
+          </div>
+          <button class="carousel__btn carousel__btn--next" (click)="next()" [disabled]="carouselImages.length <= 1">&#8250;</button>
+        </div>
+        @if (carouselImages.length > 1) {
+          <div class="carousel__thumbs">
+            @for (img of carouselImages; track $index) {
+              <img
+                [src]="img"
+                [alt]="product.name"
+                class="carousel__thumb"
+                [class.carousel__thumb--active]="currentIndex === $index"
+                (click)="goTo($index)"
+              />
+            }
+          </div>
+        }
+      </div>
+
+      <div class="product-detail__info">
+        <span class="product-detail__category">{{ product.category_name }}</span>
+        <h1 class="product-detail__name">{{ product.name }}</h1>
+        <p class="product-detail__price">{{ product.price | currency:'MXN':'symbol':'1.2-2' }}</p>
+
+        <div class="product-detail__stock" [class.product-detail__stock--low]="product.stock < 5">
+          @if (product.stock > 0) {
+            En stock — {{ product.stock }} unidades disponibles
+          } @else {
+            ❌ Agotado
+          }
+        </div>
+
+        @if (product.description) {
+          <div class="product-detail__description">
+            <h2 class="product-detail__desc-title">Descripción</h2>
+            <p>{{ product.description }}</p>
+          </div>
+        }
+
+        @if (isSpecsCategory && product.specifications?.length) {
+          <div class="product-detail__specs">
+            <h2 class="product-detail__desc-title">{{ specsTitle }}</h2>
+            <table class="specs-table">
+              @for (spec of product.specifications; track spec.key) {
+                <tr class="specs-table__row">
+                  <th class="specs-table__key">{{ spec.key }}</th>
+                  <td class="specs-table__val">{{ spec.value }}</td>
+                </tr>
+              }
+            </table>
+          </div>
+        }
+
+        @if (isClothing) {
+          <div class="product-detail__sizes">
+            <p class="product-detail__sizes-label">
+              Talla
+              @if (sizeError) {
+                <span class="product-detail__sizes-error">— Selecciona una talla</span>
+              }
+            </p>
+            <div class="size-picker">
+              @for (size of sizes; track size) {
+                <button
+                  class="size-picker__btn"
+                  [class.size-picker__btn--active]="selectedSize === size"
+                  (click)="selectSize(size)"
+                >{{ size }}</button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (product.stock > 0) {
+          <div class="product-detail__qty-row">
+            <label class="product-detail__qty-label">Cantidad</label>
+            <div class="qty-stepper">
+              <button class="qty-stepper__btn" (click)="decrement()" [disabled]="quantity <= 1">−</button>
+              <span class="qty-stepper__val">{{ quantity }}</span>
+              <button class="qty-stepper__btn" (click)="increment()" [disabled]="quantity >= product.stock">+</button>
+            </div>
+          </div>
+
+          @if (added) {
+            <div class="alert alert--success">✔ Producto agregado al carrito</div>
+          }
+
+          <button class="btn product-detail__add-btn" (click)="addToCart()">
+            Agregar al carrito
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

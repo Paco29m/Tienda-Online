@@ -1,0 +1,43 @@
+<header class="navbar">
+  <div class="navbar__container">
+    <a routerLink="/" class="navbar__brand" (click)="closeMenu()">
+      <span class="navbar__logo">🛒</span>
+      <span class="navbar__name">TiendaOnline</span>
+    </a>
+
+    <button class="navbar__toggle" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen">
+      <span class="navbar__toggle-bar"></span>
+      <span class="navbar__toggle-bar"></span>
+      <span class="navbar__toggle-bar"></span>
+    </button>
+
+    <nav class="navbar__menu" [class.navbar__menu--open]="menuOpen">
+      <a routerLink="/" routerLinkActive="navbar__link--active"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="navbar__link" (click)="closeMenu()">Inicio</a>
+      <a routerLink="/products" routerLinkActive="navbar__link--active"
+         class="navbar__link" (click)="closeMenu()">Productos</a>
+
+      @if (auth.isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="navbar__link--active"
+           class="navbar__link" (click)="closeMenu()">Admin</a>
+      }
+
+      @if (auth.isLoggedIn()) {
+        <span class="navbar__user">{{ auth.user()?.name }}</span>
+        <button class="navbar__btn navbar__btn--outline" (click)="auth.logout()">
+          Cerrar sesión
+        </button>
+      } @else {
+        <a routerLink="/login" class="navbar__btn" (click)="closeMenu()">Iniciar sesión</a>
+      }
+
+      <button class="navbar__cart" (click)="cart.open()" aria-label="Abrir carrito">
+        🛒
+        @if (cart.totalItems() > 0) {
+          <span class="navbar__cart-badge">{{ cart.totalItems() }}</span>
+        }
+      </button>
+    </nav>
+  </div>
+</header>

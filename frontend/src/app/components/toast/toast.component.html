@@ -1,0 +1,13 @@
+<div class="toast-container" aria-live="polite" aria-atomic="false">
+  @for (t of toast.toasts(); track t.id) {
+    <div class="toast toast--{{ t.type }}" role="alert">
+      <span class="toast__icon">
+        @if (t.type === 'success') { ✓ }
+        @else if (t.type === 'error') { ✕ }
+        @else { ℹ }
+      </span>
+      <span class="toast__message">{{ t.message }}</span>
+      <button class="toast__close" (click)="toast.dismiss(t.id)" aria-label="Cerrar">✕</button>
+    </div>
+  }
+</div>

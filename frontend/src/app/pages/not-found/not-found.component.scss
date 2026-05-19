@@ -1,0 +1,36 @@
+.not-found {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__code {
+    font-size: clamp(6rem, 20vw, 10rem);
+    font-weight: 900;
+    line-height: 1;
+    color: transparent;
+    background: linear-gradient(135deg, var(--color-primary), #ff8c94);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  &__title {
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700;
+    color: var(--color-dark);
+  }
+
+  &__text {
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+}
