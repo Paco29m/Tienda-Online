@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
@@ -23,6 +23,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private cartService     = inject(CartService);
   private toastService    = inject(ToastService);
   private titleService    = inject(Title);
+  private cdr             = inject(ChangeDetectorRef);
   private destroy$        = new Subject<void>();
   private searchSubject$  = new Subject<string>();
 
@@ -66,9 +67,11 @@ export class ProductsComponent implements OnInit, OnDestroy {
           this.products = res.data;
           this.pagination = res.pagination;
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loading = false;
+          this.cdr.detectChanges();
           this.toastService.error('Error al cargar los productos');
         },
       });
