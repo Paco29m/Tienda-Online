@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ProductService } from '../../../services/product.service';
 import { CategoryService } from '../../../services/category.service';
@@ -47,20 +47,23 @@ import { CategoryService } from '../../../services/category.service';
   `],
 })
 export class AdminDashboardComponent implements OnInit {
-  private productService = inject(ProductService);
+  private productService  = inject(ProductService);
   private categoryService = inject(CategoryService);
   private title = inject(Title);
+  private cdr   = inject(ChangeDetectorRef);
 
   totalProducts = 0;
   totalCategories = 0;
 
   ngOnInit() {
     this.title.setTitle('Dashboard | Admin | TiendaOnline');
-    this.productService.getAll({ limit: 1 }).subscribe(
-      (res) => (this.totalProducts = res.pagination.total)
-    );
-    this.categoryService.getAll().subscribe(
-      (res) => (this.totalCategories = res.data.length)
-    );
+    this.productService.getAll({ limit: 1 }).subscribe(res => {
+      this.totalProducts = res.pagination.total;
+      this.cdr.detectChanges();
+    });
+    this.categoryService.getAll().subscribe(res => {
+      this.totalCategories = res.data.length;
+      this.cdr.detectChanges();
+    });
   }
 }

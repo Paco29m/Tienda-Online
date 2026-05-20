@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CategoryService } from '../../../services/category.service';
 import { Category } from '../../../models';
@@ -11,6 +11,7 @@ import { Category } from '../../../models';
 })
 export class AdminCategoriesComponent implements OnInit {
   private categoryService = inject(CategoryService);
+  private cdr             = inject(ChangeDetectorRef);
 
   categories: Category[] = [];
   loading = true;
@@ -31,8 +32,9 @@ export class AdminCategoriesComponent implements OnInit {
       next: (res) => {
         this.categories = res.data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => (this.loading = false),
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 

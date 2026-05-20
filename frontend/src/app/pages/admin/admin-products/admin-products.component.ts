@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 import { ProductService } from '../../../services/product.service';
@@ -16,6 +16,7 @@ const SPECS_CATEGORIES = ['Electrónica', 'Hogar', 'Ropa'];
 export class AdminProductsComponent implements OnInit {
   private productService  = inject(ProductService);
   private categoryService = inject(CategoryService);
+  private cdr             = inject(ChangeDetectorRef);
 
   products:  Product[]  = [];
   categories: Category[] = [];
@@ -51,8 +52,8 @@ export class AdminProductsComponent implements OnInit {
   loadProducts() {
     this.loading = true;
     this.productService.getAll({ limit: 100 }).subscribe({
-      next:  res => { this.products = res.data; this.loading = false; },
-      error: ()  => (this.loading = false),
+      next:  res => { this.products = res.data; this.loading = false; this.cdr.detectChanges(); },
+      error: ()  => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 
