@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { Title } from '@angular/platform-browser';
@@ -16,6 +16,7 @@ export class HomeComponent implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private title = inject(Title);
+  private cdr   = inject(ChangeDetectorRef);
 
   featured: Product[] = [];
   categories: Category[] = [];
@@ -27,12 +28,13 @@ export class HomeComponent implements OnInit {
       next: (res) => {
         this.featured = res.data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => (this.loading = false),
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
 
     this.categoryService.getAll().subscribe({
-      next: (res) => (this.categories = res.data),
+      next: (res) => { this.categories = res.data; this.cdr.detectChanges(); },
     });
   }
 }

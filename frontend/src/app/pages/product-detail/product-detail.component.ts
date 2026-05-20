@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { Title } from '@angular/platform-browser';
@@ -19,6 +19,7 @@ export class ProductDetailComponent implements OnInit {
   private cartService    = inject(CartService);
   private toastService   = inject(ToastService);
   private titleService   = inject(Title);
+  private cdr            = inject(ChangeDetectorRef);
 
   product: Product | null = null;
   loading      = true;
@@ -63,11 +64,13 @@ export class ProductDetailComponent implements OnInit {
         this.currentIndex = 0;
         this.loading      = false;
         this.titleService.setTitle(`${res.data.name} | TiendaOnline`);
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error   = 'Producto no encontrado';
         this.loading = false;
         this.titleService.setTitle('Producto no encontrado | TiendaOnline');
+        this.cdr.detectChanges();
       },
     });
   }
