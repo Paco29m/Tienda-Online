@@ -1,5 +1,14 @@
 # TiendaOnline — Prueba de Desarrollo de Software
 
+## Demo en vivo
+
+| | URL |
+|---|---|
+| Frontend (Vercel) | https://tienda-online-rust-six.vercel.app |
+| Backend API (Railway) | https://tienda-online-production-60e1.up.railway.app/api/health |
+
+---
+
 E-commerce completo con **Angular 19** (frontend) + **Node.js / Express** (backend) + **PostgreSQL** (base de datos).
 
 ---
@@ -82,6 +91,7 @@ DB_PASSWORD=tu_contraseña
 JWT_SECRET=una_clave_secreta_segura
 JWT_EXPIRES_IN=24h
 NODE_ENV=development
+ALLOWED_ORIGIN=http://localhost:4200
 ```
 
 ### 2. Crear la base de datos en PostgreSQL
@@ -298,4 +308,4 @@ categories (1) ──────< products (N)
 - JWT firmado con clave secreta via variable de entorno.
 - Validación de entrada con Joi; campos desconocidos se descartan automáticamente.
 - Errores internos de BD normalizados (no se exponen al cliente).
-- CORS habilitado; restringir el origen en producción.
+- CORS restringido al dominio configurado en `ALLOWED_ORIGIN` (soporta múltiples orígenes separados por coma).

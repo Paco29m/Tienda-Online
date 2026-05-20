@@ -18,7 +18,17 @@ const authLimiter = rateLimit({
   message: { error: 'Demasiados intentos, intenta de nuevo en 15 minutos.' },
 });
 
-app.use(cors());
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200')
+  .split(',')
+  .map(o => o.trim());
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origen no permitido — ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use('/api/auth', authLimiter, authRoutes);
