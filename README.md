@@ -46,12 +46,13 @@ Segundo filtro/
 │
 ├── frontend/
 │   └── src/app/
-│       ├── components/       # Header, Cart (carrito lateral)
+│       ├── components/       # Header, Cart (carrito lateral), Toast (notificaciones)
 │       ├── guards/           # authGuard, adminGuard
 │       ├── interceptors/     # Inyección automática de JWT
 │       ├── models/           # Interfaces TypeScript
 │       ├── pages/            # Home, Products, ProductDetail, Login, Register, Admin
-│       └── services/         # AuthService, ProductService, CategoryService, CartService
+│       ├── services/         # AuthService, ProductService, CategoryService, CartService, ToastService
+    └── pages/not-found/  # Página 404 personalizada
 │
 ├── ER-Diagram.html           # Diagrama entidad-relación (abrir en navegador)
 ├── TiendaOnline.postman_collection.json  # Colección Postman importable
@@ -286,6 +287,11 @@ categories (1) ──────< products (N)
 - [x] Metodología BEM en CSS
 - [x] Lazy loading de rutas (Angular)
 - [x] Guards de autenticación y autorización por rol
+- [x] Búsqueda con debounce (400 ms, sin llamadas innecesarias a la API)
+- [x] Skeleton loaders durante la carga de datos
+- [x] Notificaciones toast globales (éxito, error, info)
+- [x] Página 404 personalizada
+- [x] Títulos de página dinámicos por ruta
 
 ### Backend
 - [x] CRUD completo (products, categories, users)
@@ -299,6 +305,7 @@ categories (1) ──────< products (N)
 - [x] JSONB para especificaciones e imágenes (flexible, sin tablas extra)
 - [x] Trigger automático para `updated_at`
 - [x] Seed idempotente con `ON CONFLICT`
+- [x] Rate limiting en `/api/auth` (20 solicitudes / 15 min)
 
 ---
 
