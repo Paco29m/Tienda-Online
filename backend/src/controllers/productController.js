@@ -1,5 +1,6 @@
 const db = require('../config/db');
 
+/** Lista paginada de productos con JOIN a categorías; admite filtros por category_id y búsqueda ILIKE. */
 const getAll = async (req, res, next) => {
   try {
     const { category_id, search, page = 1, limit = 12 } = req.query;
@@ -49,6 +50,7 @@ const getAll = async (req, res, next) => {
   }
 };
 
+/** Devuelve un producto por ID con el nombre de su categoría. */
 const getOne = async (req, res, next) => {
   try {
     const result = await db.query(
@@ -67,6 +69,7 @@ const getOne = async (req, res, next) => {
   }
 };
 
+/** Crea un producto; images y specifications se almacenan como JSONB. */
 const create = async (req, res, next) => {
   try {
     const { name, description, price, stock, image_url, images, category_id, specifications } = req.body;
@@ -82,6 +85,7 @@ const create = async (req, res, next) => {
   }
 };
 
+/** Actualización parcial: solo sobreescribe los campos presentes en el body. */
 const update = async (req, res, next) => {
   try {
     const existing = await db.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
@@ -115,6 +119,7 @@ const update = async (req, res, next) => {
   }
 };
 
+/** Elimina un producto; devuelve 404 si no existe. */
 const remove = async (req, res, next) => {
   try {
     const result = await db.query(

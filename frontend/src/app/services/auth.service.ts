@@ -5,6 +5,10 @@ import { Router } from '@angular/router';
 import { AuthResponse, User } from '../models';
 import { environment } from '../../environments/environment';
 
+/**
+ * Gestiona el estado de autenticación mediante señales de Angular.
+ * Token y datos de usuario se persisten en localStorage para sobrevivir recargas de página.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly API = `${environment.apiUrl}/auth`;
@@ -19,6 +23,7 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  /** Envía las credenciales y almacena el JWT y los datos del usuario devueltos. */
   login(email: string, password: string) {
     return this.http.post<AuthResponse>(`${this.API}/login`, { email, password }).pipe(
       tap((res) => {
@@ -30,10 +35,12 @@ export class AuthService {
     );
   }
 
+  /** Registra un nuevo usuario (el rol 'user' se asigna en el servidor). */
   register(name: string, email: string, password: string) {
     return this.http.post(`${this.API}/register`, { name, email, password });
   }
 
+  /** Limpia la sesión local y redirige a /login. */
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

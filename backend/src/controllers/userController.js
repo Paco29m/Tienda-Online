@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 
+/** Lista todos los usuarios (solo datos públicos, sin password_hash). */
 const getAll = async (req, res, next) => {
   try {
     const result = await db.query(
@@ -12,6 +13,7 @@ const getAll = async (req, res, next) => {
   }
 };
 
+/** Devuelve un usuario por ID; 404 si no existe. */
 const getOne = async (req, res, next) => {
   try {
     const result = await db.query(
@@ -27,6 +29,7 @@ const getOne = async (req, res, next) => {
   }
 };
 
+/** Actualiza un usuario. Un usuario solo puede editar su propio perfil; solo el admin puede cambiar el rol. */
 const update = async (req, res, next) => {
   try {
     const existing = await db.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
@@ -62,6 +65,7 @@ const update = async (req, res, next) => {
   }
 };
 
+/** Elimina un usuario por ID (solo admin). */
 const remove = async (req, res, next) => {
   try {
     const result = await db.query(

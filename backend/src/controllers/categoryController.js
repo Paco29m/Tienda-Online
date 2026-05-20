@@ -1,5 +1,6 @@
 const db = require('../config/db');
 
+/** Devuelve todas las categorías ordenadas alfabéticamente. */
 const getAll = async (req, res, next) => {
   try {
     const result = await db.query(
@@ -11,6 +12,7 @@ const getAll = async (req, res, next) => {
   }
 };
 
+/** Devuelve una categoría por ID; 404 si no existe. */
 const getOne = async (req, res, next) => {
   try {
     const result = await db.query(
@@ -26,6 +28,7 @@ const getOne = async (req, res, next) => {
   }
 };
 
+/** Crea una categoría; el nombre tiene restricción UNIQUE en la BD (lanza 409 vía errorHandler). */
 const create = async (req, res, next) => {
   try {
     const { name, description } = req.body;
@@ -39,6 +42,7 @@ const create = async (req, res, next) => {
   }
 };
 
+/** Actualización parcial de categoría; respeta los valores actuales si el campo no se envía. */
 const update = async (req, res, next) => {
   try {
     const existing = await db.query('SELECT * FROM categories WHERE id = $1', [req.params.id]);
@@ -58,6 +62,7 @@ const update = async (req, res, next) => {
   }
 };
 
+/** Elimina una categoría; los productos asociados quedan con category_id = NULL (ON DELETE SET NULL). */
 const remove = async (req, res, next) => {
   try {
     const result = await db.query(

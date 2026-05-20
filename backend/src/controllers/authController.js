@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 
+/** Registra un nuevo usuario hasheando la contraseña con bcrypt antes de guardarla. */
 const register = async (req, res, next) => {
   try {
     const { name, email, password, role = 'user' } = req.body;
@@ -23,6 +24,7 @@ const register = async (req, res, next) => {
   }
 };
 
+/** Verifica credenciales y devuelve un JWT firmado junto con los datos públicos del usuario. */
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -49,6 +51,7 @@ const login = async (req, res, next) => {
   }
 };
 
+/** Devuelve el perfil del usuario autenticado identificado por req.user.id. */
 const me = async (req, res, next) => {
   try {
     const result = await db.query(

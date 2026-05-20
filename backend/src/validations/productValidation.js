@@ -1,5 +1,6 @@
 const Joi = require('joi');
 
+/** Esquemas Joi para los endpoints de productos. productUpdateSchema hace opcionales name y price. */
 const specSchema = Joi.object({
   key:   Joi.string().max(100).required(),
   value: Joi.string().max(255).required(),

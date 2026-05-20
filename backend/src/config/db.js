@@ -1,5 +1,10 @@
 const { Pool } = require('pg');
 
+/**
+ * PostgreSQL connection pool.
+ * Uses DATABASE_URL (Railway / cualquier proveedor cloud) si está definida;
+ * en caso contrario usa las variables individuales del .env local.
+ */
 const pool = process.env.DATABASE_URL
   ? new Pool({
       connectionString: process.env.DATABASE_URL,

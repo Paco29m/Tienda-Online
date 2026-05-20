@@ -1,5 +1,9 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * Verifica el JWT del header Authorization (Bearer <token>).
+ * Si es válido, adjunta el payload decodificado en req.user y llama a next().
+ */
 const authenticate = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -17,6 +21,10 @@ const authenticate = (req, res, next) => {
   });
 };
 
+/**
+ * Permite el acceso solo si req.user.role === 'admin'.
+ * Debe ejecutarse después de authenticate.
+ */
 const authorizeAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Admin access required' });

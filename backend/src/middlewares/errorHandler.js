@@ -1,3 +1,8 @@
+/**
+ * Manejador de errores centralizado de Express.
+ * Traduce códigos de error de PostgreSQL a respuestas HTTP semánticas
+ * y evita exponer el stack trace al cliente.
+ */
 const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
 

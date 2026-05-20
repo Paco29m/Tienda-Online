@@ -1,5 +1,6 @@
 const Joi = require('joi');
 
+/** Esquemas Joi para los endpoints de autenticación. */
 const registerSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
   email: Joi.string().email().required(),
